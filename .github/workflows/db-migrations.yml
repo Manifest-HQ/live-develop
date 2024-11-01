@@ -27,17 +27,32 @@ jobs:
         run: |
           bun install
 
-      - name: Run DB Migrate with Bun
-        run: bun prisma migrate deploy
+      - name: Apply Pending Migrations
+        uses: nick-fields/retry@v3
         if: env.MIGRATION_NEEDED == 'true'
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        with:
+          timeout_minutes: 5
+          max_attempts: 10
+          retry_on: error
+          command: bun prisma migrate deploy
+          warning_on_retry: true
+          retry_wait_seconds: 10
 
-      - name: Run DB Push with Bun
-        run: bun prisma db push --accept-data-loss
+      - name: Run Prisma Migrations
+        uses: nick-fields/retry@v3
         if: env.MIGRATION_NEEDED == 'true'
+        id: db_migration
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        with:
+          timeout_minutes: 5
+          max_attempts: 10
+          retry_on: error
+          command: bun prisma db push --accept-data-loss
+          warning_on_retry: true
+          retry_wait_seconds: 10
 
       - name: Enable Realtime on All Tables
         run: psql $DATABASE_URL -f enable_realtime.sql
