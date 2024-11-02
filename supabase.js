@@ -2,9 +2,9 @@ import { createClient } from '@supabase/supabase-js'
 
 // SUPABASE instance of the project
 const supabaseUrl = '{{SUPABASE_URL}}'
-const supabasePublicKey = '{{SUPABASE_PUBLIC_KEY}}'
+const supabasePublishableKey = '{{SUPABASE_PUBLISHABLE_KEY}}'
 
-const supabase = createClient(supabaseUrl, supabasePublicKey)
+const supabase = createClient(supabaseUrl, supabasePublishableKey)
 
 const supabaseManifestDB = createClient(
   // Manifest HQ Main Supabase URL

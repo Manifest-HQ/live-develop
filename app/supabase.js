@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = '{{SUPABASE_URL}}'
-const supabasePublicKey = '{{SUPABASE_PUBLIC_KEY}}'
+const supabasePublishableKey = '{{SUPABASE_PUBLISHABLE_KEY}}'
 
-const supabase = createClient(supabaseUrl, supabasePublicKey)
+const supabase = createClient(supabaseUrl, supabasePublishableKey)
 
 export default supabase
