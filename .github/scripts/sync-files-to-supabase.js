@@ -61,7 +61,7 @@ if (
 const syncFileToSupabase = async (filePath) => {
   const content = fs.readFileSync(filePath, 'utf8')
   const fileInfo = {
-    github_repo_name: githubRepoName,
+    project_id: githubRepoName,
     file_path: filePath,
     content,
     branch: branchName // We might want to dynamically get this
@@ -71,7 +71,7 @@ const syncFileToSupabase = async (filePath) => {
   const { data, error } = await supabaseManifestDB
     .from('files')
     .upsert(fileInfo, {
-      onConflict: 'github_repo_name, file_path, branch'
+      onConflict: 'project_id, file_path, branch'
     })
 
   if (error) {
