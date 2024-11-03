@@ -24,14 +24,14 @@ jobs:
       - name: Install dependencies
         run: |
           mv package.json package.json_backup
-          bun i cheerio@^1.0.0-rc.12 fs@^0.0.1-security path@^0.12.7 @supabase/supabase-js
+          bun i cheerio@^1.0.0-rc.12 fs@^0.0.1-security path@^0.12.7 @supabase/supabase-js axios
           mv package.json_backup package.json
 
       - name: Sync Files
         env:
           GITHUB_REPO_NAME: ${{ github.repository }}
           SUPABASE_URL: ${{ secrets.MANIFEST_SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.MANIFEST_SUPABASE_PUBLIC_KEY }}
+          SUPABASE_KEY: ${{ secrets.MANIFEST_SUPABASE_PUBLISHABLE_KEY }}
           BRANCH_NAME: ${{ github.ref_name }}
         run: node .github/scripts/sync-files-to-supabase.js $BRANCH_NAME
 
