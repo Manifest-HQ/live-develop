@@ -28,11 +28,13 @@ jobs:
           mv package.json_backup package.json
 
       - name: Sync Files
+        timeout-minutes: 5
         env:
           GITHUB_REPO_NAME: ${{ github.repository }}
           SUPABASE_URL: ${{ secrets.MANIFEST_SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.MANIFEST_SUPABASE_PUBLISHABLE_KEY }}
           BRANCH_NAME: ${{ github.ref_name }}
+          MANIFEST_DB_SYNC_SECRET: ${{ secrets.MANIFEST_DB_SYNC_SECRET }}
         run: node .github/scripts/sync-files-to-supabase.js $BRANCH_NAME
 
       - name: Release

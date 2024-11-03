@@ -1,6 +1,5 @@
 import fs from 'fs'
 import path from 'path'
-import { supabaseManifestDB } from '../../supabase.js'
 import axios from 'axios'
 
 const branchName = process.argv[2]
@@ -10,6 +9,7 @@ const githubRepoName = process.env.GITHUB_REPO_NAME.split('/')[1]
 let branchID = null
 
 const branchExists = await axios({
+  method: 'GET',
   headers: {
     Authorization: `Bearer ${process.env.MANIFEST_DB_SYNC_SECRET}`
   },
@@ -18,26 +18,26 @@ const branchExists = await axios({
   }&branch=${branchName}`
 })
 
-if (branchExists.data.length === 0) {
+if (branchExists.data.data.length === 0) {
   console.log('Branch does not exist, creating...')
   try {
     const branchData = await axios({
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${process.env.MANIFEST_DB_SYNC_SECRET}`
       },
       url: `https://api.manifest-hq.com/branches?projectID=${
         githubRepoName.split('manifest-project-')[1]
-      }&branch=${branchName}`,
-      method: 'POST'
+      }&branch=${branchName}`
     })
+
+    branchID = branchData.data.data[0].id
   } catch (error) {
     console.error('Error creating branch:', error)
     process.exit(1)
   }
-
-  branchID = branchData.data[0].id
 } else {
-  branchID = branchExists.data[0].id
+  branchID = branchExists.data.data[0].id
 }
 
 console.log('Branch ID:', branchID)
@@ -69,20 +69,32 @@ if (
 }
 
 const syncFilesToSupabase = async (files) => {
-  const fileInfos = files.map((filePath) => ({
-    project_id: githubRepoName,
-    file_path: filePath,
-    content: fs.readFileSync(filePath, 'utf8'),
-    branch: branchName
-  }))
+  const fileInfos = files
+    .map((filePath) => {
+      try {
+        const content = fs.readFileSync(filePath).toString('base64')
+        return {
+          project_id: githubRepoName,
+          file_path: filePath,
+          content,
+          branch: branchName
+        }
+      } catch (e) {
+        console.log(`Skipping file: ${filePath}`)
+        console.log(e)
+        return null
+      }
+    })
+    .filter(Boolean)
 
-  console.log(`Syncing ${files.length} files to Supabase...`)
+  console.log(`Syncing ${fileInfos.length} files to Supabase...`)
 
   const projectIDSimple = githubRepoName.split('manifest-project-')[1]
   const params = `?projectID=${projectIDSimple}&branch=${branchName}`
-  await axios({
+  const response = await axios({
     headers: {
-      Authorization: `Bearer ${process.env.MANIFEST_DB_SYNC_SECRET}`
+      Authorization: `Bearer ${process.env.MANIFEST_DB_SYNC_SECRET}`,
+      'Content-Type': 'application/json'
     },
     url: `https://api.manifest-hq.com/files${params}`,
     method: 'POST',
@@ -96,16 +108,7 @@ const syncFilesToSupabase = async (files) => {
     }
   })
 
-  const { data, error } = await supabaseManifestDB
-    .from('files')
-    .upsert(fileInfos, {
-      onConflict: 'project_id, file_path, branch'
-    })
-
-  if (error) {
-    console.log('Error syncing files:')
-    console.log(error)
-  }
+  console.log(response.data)
 }
 
 const main = async () => {
@@ -122,6 +125,7 @@ const main = async () => {
     '.output'
   )
   gitignore.push('.jpg', '.jpeg', '.png', '.ico', '.webp', '.mp4')
+  gitignore.push('.jar')
   const allFiles = getFiles('.').filter((file) => {
     return !gitignore.some((ignore) => file.includes(ignore))
   })
