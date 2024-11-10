@@ -1,3 +1,4 @@
-export function ALL(req, res) {
-  res.status(200).json({ message: 'Hello, World!' })
+export function ALL(request) {
+  console.log('ALL')
+  return new Response(JSON.stringify({ message: 'Hello, World!' }))
 }

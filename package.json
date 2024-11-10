@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "cd app && bun i && bun run dev",
-    "dev:api": "vercel dev --local-config=vercel-dev.json",
+    "dev": "bun run dev:app & bun run dev:api",
+    "dev:app": "cd app && bun i && PORT=3003 bun run dev",
+    "dev:api": "cd api && bun i && PORT=4004 bun run dev",
     "lint": "eslint ."
   },
   "husky": {

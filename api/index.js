@@ -13,7 +13,7 @@ process.on('unhandledRejection', (reason, promise) => {
 })
 
 const app = express()
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 4004
 
 // Get current directory
 const __filename = fileURLToPath(import.meta.url)
@@ -22,14 +22,14 @@ const __dirname = dirname(__filename)
 // Function to recursively load routes
 async function loadRoutes(directory) {
   try {
-    console.log('Scanning directory:', directory)
+    // console.log('Scanning directory:', directory)
     const entries = await fs.readdir(directory, { withFileTypes: true })
 
     for (const entry of entries) {
       const fullPath = join(directory, entry.name)
 
       if (entry.isDirectory()) {
-        console.log('Found directory:', entry.name)
+        // console.log('Found directory:', entry.name)
         await loadRoutes(fullPath)
       } else if (entry.name === 'index.js') {
         const route =
@@ -37,11 +37,11 @@ async function loadRoutes(directory) {
             .replace(join(__dirname, 'routes'), '')
             .replace('/index.js', '') || '/'
 
-        console.log('Loading route:', route, 'from', fullPath)
+        // console.log('Loading route:', route, 'from', fullPath)
 
         try {
           const module = await import(`file://${fullPath}`)
-          console.log('Available methods:', Object.keys(module))
+          // console.log('Available methods:', Object.keys(module))
 
           const methods = ['GET', 'POST', 'PUT', 'DELETE', 'ALL']
           methods.forEach((method) => {
@@ -50,8 +50,19 @@ async function loadRoutes(directory) {
 
             if (module[upperMethod] || module[lowerMethod]) {
               const handler = module[upperMethod] || module[lowerMethod]
-              console.log('Attaching', method, 'handler for', route)
-              app[lowerMethod](route, handler)
+              // Adapt Vercel-style handler for Express
+              app[lowerMethod](route, async (req, res) => {
+                const response = await handler(req)
+                const data = await response.json()
+                const status = response.status || 200
+                const headers = Object.fromEntries(response.headers.entries())
+
+                res.status(status)
+                Object.entries(headers).forEach(([key, value]) => {
+                  res.setHeader(key, value)
+                })
+                res.json(data)
+              })
             }
           })
         } catch (error) {
@@ -78,7 +89,9 @@ app
     res.status(404).json({ details: 'Route not found' })
   })
   .listen(port, () => {
-    console.log(`Server running on port ${port}`)
+    console.log(
+      `Server running on port ${port}, got to http://localhost:${port}`
+    )
   })
   .on('error', (error) => {
     console.error('Server startup error:', error)

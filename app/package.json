@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "build": "nuxt build",
-    "dev:server": "nuxt dev --host '0.0.0.0' --port 9001",
-    "dev": "nuxt dev --port 9001",
+    "dev:server": "nuxt dev --host '0.0.0.0' --port ${PORT:-3003}",
+    "dev": "nuxt dev --port ${PORT:-3003}",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",

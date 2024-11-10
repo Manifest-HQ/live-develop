@@ -1,7 +1,7 @@
-export function ALL(req, res) {
-  res.status(200).json({ message: 'Projects all' })
+export function ALL(request) {
+  return new Response(JSON.stringify({ message: 'Projects all' }))
 }
 
-export function GET(req, res) {
-  res.status(200).json({ message: 'Projects get' })
+export function GET(request) {
+  return new Response(JSON.stringify({ message: 'Projects get' }))
 }
