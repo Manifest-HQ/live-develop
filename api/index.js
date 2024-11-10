@@ -50,18 +50,25 @@ async function loadRoutes(directory) {
 
             if (module[upperMethod] || module[lowerMethod]) {
               const handler = module[upperMethod] || module[lowerMethod]
-              // Adapt Vercel-style handler for Express
+              // Create an adapter that works in both environments
               app[lowerMethod](route, async (req, res) => {
                 const response = await handler(req)
-                const data = await response.json()
-                const status = response.status || 200
-                const headers = Object.fromEntries(response.headers.entries())
 
-                res.status(status)
-                Object.entries(headers).forEach(([key, value]) => {
-                  res.setHeader(key, value)
-                })
-                res.json(data)
+                // If we're in Express (res exists), adapt the Response
+                if (res) {
+                  const data = await response.json()
+                  const status = response.status || 200
+                  const headers = Object.fromEntries(response.headers.entries())
+
+                  res.status(status)
+                  Object.entries(headers).forEach(([key, value]) => {
+                    res.setHeader(key, value)
+                  })
+                  return res.json(data)
+                }
+
+                // If we're in Vercel (no res object), return Response directly
+                return response
               })
             }
           })
