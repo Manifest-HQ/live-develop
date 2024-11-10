@@ -55,7 +55,7 @@ async function loadRoutes(directory) {
                 const response = await handler(req)
 
                 // If we're in Express (res exists), adapt the Response
-                if (res) {
+                if (res && res.status) {
                   const data = await response.json()
                   const status = response.status || 200
                   const headers = Object.fromEntries(response.headers.entries())
