@@ -5,5 +5,5 @@ export function GET(request) {
 }
 
 export const config = {
-  runtime: 'edge'
+  runtime: 'nodejs' // 'edge' | 'nodejs' | 'python' | 'go'
 }

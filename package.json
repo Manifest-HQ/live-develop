@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "cd app && bun i && bun run dev",
+    "dev:api": "vercel dev --local-config=vercel-dev.json",
     "lint": "eslint ."
   },
   "husky": {

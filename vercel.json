@@ -1,14 +1,17 @@
 {
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1.js"
-    }
+  "rewrites": [
+    { "source": "/api/helpers/:path*", "destination": "/404" },
+    { "source": "/api/:path*", "destination": "/api/:path*.js" }
   ],
-  "buildCommand": "cd app && bun run generate",
+  "buildCommand": "cd app && bun i && bun run generate",
   "outputDirectory": "app/.output/public",
   "installCommand": "cd app && bun install",
   "framework": "nuxtjs",
+  "functions": {
+    "api/**/*": {
+      "maxDuration": 60
+    }
+  },
   "git": {
     "deploymentEnabled": {
       "main": true
