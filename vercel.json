@@ -1,8 +1,8 @@
 {
   "routes": [
     {
-      "src": "/functions/(.*)",
-      "dest": "/functions/$1.js"
+      "src": "/api/(.*)",
+      "dest": "/api/$1.js"
     }
   ],
   "buildCommand": "cd app && bun run generate",

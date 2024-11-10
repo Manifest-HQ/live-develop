@@ -52,7 +52,7 @@ jobs:
           retry_on: error
           command: bun prisma db push --accept-data-loss
           warning_on_retry: true
-          retry_wait_seconds: 10
+          retry_wait_seconds: 30
 
       - name: Enable Realtime on All Tables
         run: psql $DATABASE_URL -f enable_realtime.sql
